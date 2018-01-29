@@ -6,11 +6,11 @@ class Board extends Component {
   constructor(props){
     super(props);
     this.state = {
-      rows: this.createBoard(props)
+      rows: this.createMinesweeperBoard(props)
     }
   }
 
-  createBoard = props =>{
+  createMinesweeperBoard = props =>{
     let board = [];
     for(let i = 0; i < props.rows; i++) {
       board.push([]);
@@ -48,26 +48,26 @@ class Board extends Component {
 
 
 
-open = cell => {
-  let asyncCountMines = new Promise(resolve => {
-    let mines = this.findMines(cell);
+openCellFunction = cell => {
+  let asyncCountNumberOfMines = new Promise(resolve => {
+    let mines = this.calculateNumberOfMinesAdjacentToTheCell(cell);
     resolve(mines);
   })
 
-  asyncCountMines.then(numberOfMines =>{
+  asyncCountNumberOfMines.then(numberOfMines =>{
     //console.log(numberOfMines);
-
     let rows = this.state.rows;
     let current = rows[cell.y][cell.x];
 
-
+    // If the first cell selected by the player is Mine, then restart the game again
     if(current.hasMine && this.props.openCells === 0){
       console.log("Cell has Mine. Start Over!");
-      let newRows = this.createBoard(this.props);
+      //Setting the new game with same properties received in the function
+      let newRows = this.createMinesweeperBoard(this.props);
       this.setState({
         rows: newRows
       }, () => {
-          this.open(cell);
+          this.openCellFunction(cell);
       })
     } else {
       if(!cell.hasFlag && !current.isOpen){
@@ -76,7 +76,7 @@ open = cell => {
         current.count = numberOfMines;
         this.setState({rows});
         if(!current.hasMine && numberOfMines === 0){
-          this.findAroundCell(cell);
+          this.findAdjacentCell(cell);
         }
         //console.log(this.state.rows);
       }
@@ -85,14 +85,15 @@ open = cell => {
   })
 };
 
-findAroundCell = cell => {
+// function to check which adjacent cells are opened
+findAdjacentCell = cell => {
   let rows = this.state.rows;
   for(let row = -1; row <= 1; row++){
-    for(let col=-1;col<=1;col++){
-      if(cell.y + row >= 0 && cell.x + col >=0){
-        if(cell.y + row < rows.length && cell.x + col < rows[0].length){
-          if(!rows[cell.y + row][cell.x + col].hasMine && !rows[cell.y + row][cell.x + col].isOpen){
-              this.open(rows[cell.y+row][cell.x+col]);
+    for(let column =-1;column<=1;column++){
+      if(cell.y + row >= 0 && cell.x + column >=0){
+        if(cell.y + row < rows.length && cell.x + column < rows[0].length){
+          if(!rows[cell.y + row][cell.x + column].hasMine && !rows[cell.y + row][cell.x + column].isOpen){
+              this.openCellFunction(rows[cell.y+row][cell.x+column]);
           }
         }
       }
@@ -100,20 +101,21 @@ findAroundCell = cell => {
   }
 }
 
-findMines = cell => {
-  let minesInProximity = 0;
+//function to count the number of mines adjacant to the current cell
+calculateNumberOfMinesAdjacentToTheCell = cell => {
+  let numberOfMinesAdjacent = 0;
   for(let row = -1; row <= 1; row++){
-    for(let col = -1; col<=1; col++){
-      if(cell.y + row >= 0 && cell.x + col >=0){
-        if(cell.y + row < this.state.rows.length && cell.x + col < this.state.rows[0].length){
-          if(this.state.rows[cell.y + row][cell.x + col].hasMine && !(row ===0 && col===0)){
-            minesInProximity++;
+    for(let column = -1; column<=1; column++){
+      if(cell.y + row >= 0 && cell.x + column >=0){
+        if(cell.y + row < this.state.rows.length && cell.x + column < this.state.rows[0].length){
+          if(this.state.rows[cell.y + row][cell.x + column].hasMine && !(row ===0 && column===0)){
+            numberOfMinesAdjacent++;
           }
         }
       }
     }
   }
-  return minesInProximity;
+  return numberOfMinesAdjacent;
 }
 
   render() {
@@ -122,7 +124,7 @@ findMines = cell => {
           <Row
             cells = {row}
             key = {index}
-            open = {this.open}
+            open = {this.openCellFunction}
           />
         )
     })

@@ -6,8 +6,11 @@ import BoardFooter from "./components/BoardFooter";
 class Minesweeper extends Component {
   constructor(){
     super();
-    this.intervals = [];
+    this.timeIntervals = [];
   }
+
+//Defining the state of minesweeper board.
+// Example: status which can range from waiting, running or ended, number of rows and columns, flags, mines, timer and cells which are open
   state = {
     status: "waiting",
     rows: 10,
@@ -19,23 +22,27 @@ class Minesweeper extends Component {
   };
 
 
-tick = () => {
+
+//function to keep track of time and increment the timer everytime an open cell is still there and the game status is running
+timerTick = () => {
   if(this.state.openCells > 0 && this.state.status === "running"){
     let time = this.state.time + 1;
     this.setState({time})
   }
 }
 
-setInterval = (fn, tim) => {
-  this.intervals.push(setInterval(fn,tim));
+// setting time interval and passing the values function and the timer.
+setInterval = (funcn, timer) => {
+  this.timeIntervals.push(setInterval(funcn,timer));
 }
 
-handleCellClick = () => {
+// function to handle the cell click event handling
+cellClick = () => {
   if(this.state.openCells === 0 && this.state.status !== "running"){
     this.setState({
       status: "running"
     },() => {
-      this.setInterval(this.tick,1000);
+      this.setInterval(this.timerTick,1000);
     })
   }
   this.setState(prevState => {
@@ -43,6 +50,8 @@ handleCellClick = () => {
   })
 }
 
+
+// the main part where everything on the web page is rendered.
   render() {
     return (
       <div className="minsesweeper">
@@ -52,8 +61,7 @@ handleCellClick = () => {
           columns = {this.state.columns}
           mines = {this.state.mines}
           openCells = {this.state.openCells}
-          openCellClick = {this.handleCellClick}/>
-        
+          openCellClick = {this.cellClick}/>
       </div>
     );
   }

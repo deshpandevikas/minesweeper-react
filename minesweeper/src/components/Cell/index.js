@@ -3,7 +3,7 @@ import React from 'react';
 
 const Cell = props => {
   console.log(props.data)
-  let renderCell = () => {
+  let eachCell = () => {
     if(props.data.isOpen){
       if(props.data.count === 0){
         return (
@@ -34,7 +34,7 @@ const Cell = props => {
       )
     }
   }
-  return renderCell();
+  return eachCell();
 };
 
 
